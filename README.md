@@ -1,4 +1,4 @@
-# message-parser [![Build Status](https://secure.travis-ci.org/parroit/message-parser.png?branch=master)](http://travis-ci.org/parroit/message-parser) [![Npm module](https://badge.fury.io/js/message-parse.png)](https://npmjs.org/package/message-parse)
+# message-parser [![Build Status](https://secure.travis-ci.org/parroit/message-parser.png?branch=master)](http://travis-ci.org/parroit/message-parser) [![Npm module](https://badge.fury.io/js/message-parser.png)](https://npmjs.org/package/message-parser)
 
 listen for fetched mail messages on corriera, parse them and
 emit parsed messages and attachments to corriera.
