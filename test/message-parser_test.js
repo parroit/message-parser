@@ -9,7 +9,10 @@
 
 'use strict';
 
-var messageParser = require('../lib/message-parser.js');
+var messageParserModule = require('../lib/message-parser.js');
+var MessageParser = require('../lib/message-parser.js').MessageParser;
+
+var messageParser = new MessageParser();
 
 
 var expect = require('chai').expect;
@@ -19,8 +22,8 @@ require('chai').should();
 describe('messageParser',function(){
     describe("module",function() {
         it("should load",function(){
-            expect(messageParser).not.to.be.equal(null);
-            expect(messageParser).to.be.a('object');
+            expect(messageParserModule).not.to.be.equal(null);
+            expect(messageParserModule).to.be.a('object');
 
         });
     });
@@ -95,14 +98,15 @@ describe('messageParser',function(){
         var attachments = fs.createReadStream("./test/attachments.msg");
 
         it("should listen to stream messages emitted ala fetchmail - and emit parsed objects",function(done){
-            messageParser.run('messageFetched',/(.*)/);
+            var mp = new MessageParser();
+            mp.run('messageFetched',/(.*)/);
 
 
             var bus = require("corriera");
 
             bus.once('messageParsed', /(.*)/, function(messageObject){
                 expect(messageObject.from[0].address).to.be.equal("imaptest73@gmail.com");
-
+                mp.stop();
                 done();
             });
 
@@ -113,7 +117,8 @@ describe('messageParser',function(){
         });
 
         it("should emit streams for attachments",function(done){
-            messageParser.run('messageFetched',/(.*)/);
+            var mp = new MessageParser();
+            mp.run('messageFetched',/(.*)/);
 
 
             var bus = require("corriera");
@@ -128,6 +133,7 @@ describe('messageParser',function(){
 
                 var write = concat(function(data) {
                     expect(data.toString('utf8')).to.be.equal("this is a test");
+                    mp.stop()
                     done();
                 });
 
@@ -143,19 +149,20 @@ describe('messageParser',function(){
 
 
         it("should allow to unlisten messages",function(done){
-            messageParser.run('messageFetched',/(.*)/);
-            messageParser.stop();
+            var mp = new MessageParser();
+            mp.run('messageFetched',/(.*)/);
+            mp.stop();
 
 
             var bus = require("corriera");
-            var called = false;
+            var listenerCalled = false;
             var listener = function (messageObject) {
-                called=true;
+                listenerCalled=true;
             };
             bus.once('messageParsed', /(.*)/, listener);
 
             setTimeout(function(){
-                expect(called).to.be.false;
+                expect(listenerCalled).to.be.false;
                 bus.removeListener('messageParsed', listener);
                 done();
             },1000);
@@ -168,19 +175,22 @@ describe('messageParser',function(){
         });
 
         it("should listen to stream messages emitted ala fetchmail",function(done){
-            messageParser.run('messageFetched',/(.*)/);
+            this.timeout(5000);
+            var mp = new MessageParser();
+            mp.run('messageFetched',/(.*)/);
 
 
             var bus = require("corriera");
 
             bus.once('messageParsed', /(.*)/, function(messageObject){
+                //console.dir(messageObject);
                 expect(messageObject.from[0].address).to.be.equal("imaptest73@gmail.com");
-
+                mp.stop();
                 done();
             });
 
-
-            bus.emit('messageFetched',"any",messageStream);
+            var messageStream2 = fs.createReadStream("./test/expected.msg");
+            bus.emit('messageFetched',"any",messageStream2);
 
 
         });
