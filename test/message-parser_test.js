@@ -142,18 +142,21 @@ describe('messageParser',function(){
         });
 
 
-       /* it("should allow to unlisten messages",function(done){
+        it("should allow to unlisten messages",function(done){
             messageParser.run('messageFetched',/(.*)/);
             messageParser.stop();
 
 
             var bus = require("corriera");
-
-            bus.once('messageParsed', /(.*)/, function(messageObject){
-                expect(messageObject).to.be.null;
-            });
+            var called = false;
+            var listener = function (messageObject) {
+                called=true;
+            };
+            bus.once('messageParsed', /(.*)/, listener);
 
             setTimeout(function(){
+                expect(called).to.be.false;
+                bus.removeListener('messageParsed', listener);
                 done();
             },1000);
 
@@ -162,7 +165,7 @@ describe('messageParser',function(){
             bus.emit('messageFetched',"any",messageStream);
 
 
-        });*/
+        });
 
         it("should listen to stream messages emitted ala fetchmail",function(done){
             messageParser.run('messageFetched',/(.*)/);
